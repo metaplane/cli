@@ -65,6 +65,10 @@ The exact steps will vary depending on your CI/CD provider, but the following is
 
 The `actions/upload-artifact` action is used to upload and associated the generated UI as an artifact to the workflow run. This allows you to download the after the workflow has completed.
 
+If you're not using GitHub Actions, the steps will still be roughly the same but you'll need to figure out how to store the generated artifact. For example, CircleCI supports [storing artifacts](https://circleci.com/docs/artifacts/) which you could then download and view after the workflow has completed.
+
+You can also choose to upload the artifact to S3 or another storage service and then download it from there.
+
 ## Disclaimer
 
 The code in this repository is not currently buildable as it has dependencies on private packages. Maintainers will keep the code here up-to-date with the latest changes from the main, internal, repo.
