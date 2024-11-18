@@ -36,6 +36,35 @@ If you're invoking the CLI from outside of your dbt project's root or if your db
 metaplane dbt ui build --target-path /path/to/dbt/target
 ```
 
+### CI/CD usage
+
+While it's useful to visualize runs that were executed locally, it's often more useful to visualize runs that were executed in a CI/CD pipeline.
+
+The exact steps will vary depending on your CI/CD provider, but the following is an example of how you might generate the UI report in a GitHub Actions workflow.
+
+```yaml
+- name: run dbt
+  run: dbt run
+
+- name: install metaplane cli
+  run: |
+    LOCAL_BIN=$HOME/.local/bin
+    mkdir -p $LOCAL_BIN
+    curl -LSs https://github.com/metaplane/cli/releases/download/0.1.0/mp-linux-x86_64 -o $HOME/.local/bin/metaplane
+    chmod +x $HOME/.local/bin/metaplane
+    PATH=$HOME/.local/bin:$PATH
+
+- name: generate dbt results ui
+  run: metaplane dbt ui build
+
+- uses: actions/upload-artifact@v4
+  with:
+    name: metaplane-dbt-report
+    path: .metaplane/index.html
+```
+
+The `actions/upload-artifact` action is used to upload and associated the generated UI as an artifact to the workflow run. This allows you to download the after the workflow has completed.
+
 ## Disclaimer
 
 The code in this repository is not currently buildable as it has dependencies on private packages. Maintainers will keep the code here up-to-date with the latest changes from the main, internal, repo.
