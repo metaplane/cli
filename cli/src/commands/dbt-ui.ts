@@ -6,18 +6,18 @@ import { build } from "../dbt/ui/build.js";
 
 const DEFAULT_PORT = 1212;
 
-const targetDirOption = new Option(
-  "--target-dir <target-dir>",
+const targetPathOption = new Option(
+  "--target-path <target-path>",
   "dbt run target directory"
 ).default(path.join(process.cwd(), "target"));
 
 const serveArgsSchema = z.object({
-  targetDir: z.string(),
+  targetPath: z.string(),
   port: z.coerce.number(),
 });
 
 const buildArgsSchema = z.object({
-  targetDir: z.string(),
+  targetPath: z.string(),
 });
 
 export function makeDbtUICommand() {
@@ -29,13 +29,13 @@ export function makeDbtUICommand() {
     program
       .command("serve")
       .description("serve a local UI around a dbt project")
-      .addOption(targetDirOption)
+      .addOption(targetPathOption)
       .addOption(
         new Option("--port <port>", "port to listen on").default(DEFAULT_PORT)
       )
       .action(async (opts) => {
-        const { targetDir, port } = serveArgsSchema.parse(opts);
-        await serve({ targetDir, port });
+        const { targetPath, port } = serveArgsSchema.parse(opts);
+        await serve({ targetPath, port });
       });
   }
 
@@ -44,10 +44,10 @@ export function makeDbtUICommand() {
     .description(
       "build a self-contained index.html from a dbt project's target directory"
     )
-    .addOption(targetDirOption)
+    .addOption(targetPathOption)
     .action(async (opts) => {
-      const { targetDir } = buildArgsSchema.parse(opts);
-      await build({ targetDir });
+      const { targetPath } = buildArgsSchema.parse(opts);
+      await build({ targetPath });
     });
 
   return program;

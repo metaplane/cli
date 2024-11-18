@@ -1,7 +1,7 @@
 import { type DbtNode, type Manifest, readTarget } from "../utils/target.js";
 
-export function generateManifestOverview(targetDir: string) {
-  const { manifest } = readTarget(targetDir);
+export function generateManifestOverview(targetPath: string) {
+  const { manifest } = readTarget(targetPath);
   const dbtStats = computeManifestStats(manifest);
   console.log("Overall Project Stats:");
   console.log(`- Model Count: ${dbtStats.modelCount}`);

@@ -99,15 +99,15 @@ function isErrnoException(err: unknown): err is NodeJS.ErrnoException {
   return err instanceof Error && "code" in err;
 }
 
-function readRunResults(targetDir: string) {
-  const runResultsPath = path.join(targetDir, "run_results.json");
+function readRunResults(targetPath: string) {
+  const runResultsPath = path.join(targetPath, "run_results.json");
   try {
     return RunResultsSchema.parse(
       JSON.parse(fs.readFileSync(runResultsPath, "utf8"))
     );
   } catch (err) {
     if (isErrnoException(err) && err.code === "ENOENT") {
-      throw new Error(`run_results.json not found in ${targetDir}`);
+      throw new Error(`run_results.json not found in ${targetPath}`);
     } else if (err instanceof z.ZodError) {
       throw new Error(`failed to parse run_results.json\n${err.message}`);
     }
@@ -115,15 +115,15 @@ function readRunResults(targetDir: string) {
   }
 }
 
-function readManifest(targetDir: string) {
-  const manifestPath = path.join(targetDir, "manifest.json");
+function readManifest(targetPath: string) {
+  const manifestPath = path.join(targetPath, "manifest.json");
   try {
     return ManifestSchema.parse(
       JSON.parse(fs.readFileSync(manifestPath, "utf8"))
     );
   } catch (err) {
     if (isErrnoException(err) && err.code === "ENOENT") {
-      throw new Error(`manifest.json not found in ${targetDir}`);
+      throw new Error(`manifest.json not found in ${targetPath}`);
     } else if (err instanceof z.ZodError) {
       throw new Error(`failed to parse manifest.json\n${err.message}`);
     }
@@ -133,9 +133,9 @@ function readManifest(targetDir: string) {
 
 export type Target = ReturnType<typeof readTarget>;
 
-export function readTarget(targetDir: string) {
+export function readTarget(targetPath: string) {
   return {
-    runResults: readRunResults(targetDir),
-    manifest: readManifest(targetDir),
+    runResults: readRunResults(targetPath),
+    manifest: readManifest(targetPath),
   };
 }

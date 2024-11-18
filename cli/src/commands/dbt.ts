@@ -9,8 +9,8 @@ import { printManifest, printRunResults } from "../dbt/print.js";
 import { generateManifestOverview } from "../dbt/generateManifestOverview.js";
 import { makeDbtUICommand } from "./dbt-ui.js";
 
-const targetDirOption = new Option(
-  "--target-dir <target-dir>",
+const targetPathOption = new Option(
+  "--target-path <target-path>",
   "dbt run target directory"
 ).default(path.join(process.cwd(), "target"));
 
@@ -20,12 +20,12 @@ const indentOption = new Option(
 ).default(2);
 
 const printArgsSchema = z.object({
-  targetDir: z.string(),
+  targetPath: z.string(),
   indent: z.coerce.number(),
 });
 
 const generateTestsArgsSchema = z.object({
-  targetDir: z.string(),
+  targetPath: z.string(),
 });
 
 export function makeDbtCommand() {
@@ -34,30 +34,30 @@ export function makeDbtCommand() {
   program
     .command("print-run-results")
     .description("pretty print the run_results.json")
-    .addOption(targetDirOption)
+    .addOption(targetPathOption)
     .addOption(indentOption)
     .action((opts) => {
-      const { targetDir, indent } = printArgsSchema.parse(opts);
-      printRunResults(targetDir, indent);
+      const { targetPath, indent } = printArgsSchema.parse(opts);
+      printRunResults(targetPath, indent);
     });
 
   program
     .command("manifest-overview")
     .description("Generate high level information about the manifest")
-    .addOption(targetDirOption)
+    .addOption(targetPathOption)
     .action((opts) => {
-      const { targetDir } = generateTestsArgsSchema.parse(opts);
-      generateManifestOverview(targetDir);
+      const { targetPath } = generateTestsArgsSchema.parse(opts);
+      generateManifestOverview(targetPath);
     });
 
   program
     .command("print-manifest")
     .description("pretty print the manifest.json")
-    .addOption(targetDirOption)
+    .addOption(targetPathOption)
     .addOption(indentOption)
     .action((opts) => {
-      const { targetDir, indent } = printArgsSchema.parse(opts);
-      printManifest(targetDir, indent);
+      const { targetPath, indent } = printArgsSchema.parse(opts);
+      printManifest(targetPath, indent);
     });
 
   program.addCommand(makeDbtUICommand());

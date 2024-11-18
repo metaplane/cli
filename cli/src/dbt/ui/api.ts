@@ -21,8 +21,8 @@ export type RunResponse =
       stdout: string;
     };
 
-function makeRunResponses(targetDir: string): RunResponse[] {
-  const projectDir = path.dirname(targetDir);
+function makeRunResponses(targetPath: string): RunResponse[] {
+  const projectDir = path.dirname(targetPath);
   const runsDir = path.join(projectDir, ".metaplane", "runs");
 
   fs.mkdirSync(runsDir, { recursive: true });
@@ -66,15 +66,15 @@ function makeRunResponses(targetDir: string): RunResponse[] {
 }
 
 async function execRun({
-  targetDir,
+  targetPath,
   args,
 }: {
-  targetDir: string;
+  targetPath: string;
   args: string[];
 }) {
   // TODO this might not always be true
-  const projectDir = path.dirname(targetDir);
-  const commitSha = await resolveCommitSha(targetDir);
+  const projectDir = path.dirname(targetPath);
+  const commitSha = await resolveCommitSha(targetPath);
 
   const runsDir = path.join(projectDir, ".metaplane", "runs");
 
@@ -132,10 +132,10 @@ async function execRun({
   };
 }
 
-export function makeApiRoutes(app: Express, targetDir: string) {
+export function makeApiRoutes(app: Express, targetPath: string) {
   app.get("/api/runs", async (_, res) => {
-    const commitSha = await resolveCommitSha(targetDir);
-    const target = readTarget(targetDir);
+    const commitSha = await resolveCommitSha(targetPath);
+    const target = readTarget(targetPath);
     const id = target.manifest.metadata.invocation_id;
     const response: RunResponse = {
       id,
@@ -143,17 +143,17 @@ export function makeApiRoutes(app: Express, targetDir: string) {
       target,
       commitSha,
     };
-    res.json([...makeRunResponses(targetDir), response]);
+    res.json([...makeRunResponses(targetPath), response]);
   });
 
   app.post("/api/runs", async (_, res) => {
-    const { id } = await execRun({ targetDir, args: ["build"] });
+    const { id } = await execRun({ targetPath, args: ["build"] });
     res.json({ id });
   });
 
   app.post("/api/run-test/:name", async (req, res) => {
     const { id } = await execRun({
-      targetDir,
+      targetPath,
       args: ["test", "--select", req.params.name],
     });
     res.json({ id });

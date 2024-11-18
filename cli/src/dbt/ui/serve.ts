@@ -3,10 +3,10 @@ import bodyParser from "body-parser";
 import { makeApiRoutes } from "./api.js";
 
 export async function serve({
-  targetDir,
+  targetPath,
   port,
 }: {
-  targetDir: string;
+  targetPath: string;
   port: number;
 }) {
   const app = express();
@@ -22,7 +22,7 @@ export async function serve({
     });
   }
 
-  makeApiRoutes(app, targetDir);
+  makeApiRoutes(app, targetPath);
 
   if (!process.env.DEV) {
     // @ts-expect-error esbuild thing

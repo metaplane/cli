@@ -8,7 +8,6 @@ export async function resolveCommitSha(cwd: string) {
     })`git rev-parse HEAD`);
   } catch (err) {
     // ignore
-    // targetDir is likely not in a git repo
   }
   return commitSha;
 }
