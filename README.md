@@ -35,3 +35,7 @@ If you're invoking the CLI from outside of your dbt project's root or if your db
 ```sh
 metaplane dbt ui build --target-path /path/to/dbt/target
 ```
+
+## Disclaimer
+
+The code in this repository is not currently buildable as it has dependencies on private packages. Maintainers will keep the code here up-to-date with the latest changes from the main, internal, repo.
