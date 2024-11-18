@@ -1,0 +1,9 @@
+/lib
+/cli/lib
+/ui/lib
+/ui/dist
+/cli/dist
+/metaplane
+mp
+sea-prep.blob
+bin-out/

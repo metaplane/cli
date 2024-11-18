@@ -1,0 +1,15 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib",
+    "tsBuildInfoFile": "lib/tsconfig.tsbuildinfo"
+  },
+  "include": ["src/**/*", "src/**/*.json"],
+  "references": [
+    { "path": "../../super" },
+    { "path": "../../commons-ui" },
+    { "path": "../../ui" },
+    { "path": "../cli" }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "name": "@mp/metaplane-cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "metaplane": "./bin/metaplane.js"
+  },
+  "dependencies": {
+    "@mp/commons-ui": "workspace:*",
+    "@mp/ui": "workspace:*",
+    "@tanstack/react-query": "^5.59.20",
+    "@vitejs/plugin-react": "^4.3.2",
+    "body-parser": "^1.20.2",
+    "commander": "^12.1.0",
+    "date-fns": "3.6.0",
+    "evergreen-ui": "7.1.9",
+    "execa": "^9.5.1",
+    "express": "4.21.1",
+    "find-up": "^7.0.0",
+    "micromatch": "^4.0.8",
+    "pluralize": "^8.0.0",
+    "ramda": "0.28.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-router-dom": "^6.22.3",
+    "rollup": "^4.24.3",
+    "strip-ansi": "^7.1.0",
+    "super": "workspace:*",
+    "vite": "^5.4.11",
+    "vite-express": "^0.19.0",
+    "vite-plugin-singlefile": "^2.0.3",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@mp/eslint-config-browser": "workspace:*",
+    "@types/body-parser": "^1.19.5",
+    "@types/express": "^4.17.21",
+    "@types/micromatch": "^4.0.9",
+    "@types/node": "^22.7.4",
+    "@types/pluralize": "^0.0.33",
+    "@types/ramda": "0.28.0",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@types/react-router-dom": "^5.3.3",
+    "esbuild": "^0.20.0",
+    "postject": "1.0.0-alpha.6"
+  },
+  "scripts": {
+    "build-cli": "tsc -p cli",
+    "build-ui": "vite build",
+    "bundle": "esbuild --format=cjs --target=node20 --platform=node --bundle --outfile=cli/dist/index.cjs --define:process.env.DEV=false --loader:.html=text cli/lib/index.js",
+    "build-bin-linux": "./bin/build-bin linux-arm64 && ./bin/build-bin linux-x64",
+    "build-bin-all": "pnpm build-bin-linux && pnpm build-bin-macos",
+    "build-bin-macos": "./bin/build-bin macos-arm64",
+    "lint": "eslint --quiet ui/src cli/src && prettier -l \"{ui,cli}/src/**/*.{ts,tsx}\"",
+    "prerelease": "./bin/prerelease"
+  }
+}

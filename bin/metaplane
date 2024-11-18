@@ -1,0 +1,6 @@
+#! /usr/bin/env bash
+
+# change to the script's directory
+cd "$(dirname "$0")/.."
+
+DEV=1 DANGEROUSLY_ENABLE_DBT_UI_SERVE=1 node cli/lib/index.js "$@"

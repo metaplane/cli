@@ -1,0 +1,88 @@
+#!/bin/bash
+
+set -e
+
+if [ -z "$1" ]; then
+    echo "Usage: $0 <target>"
+    echo "Supported targets:"
+    echo "  - linux-arm64"
+    echo "  - linux-x64"
+    echo "  - macos-arm64"
+    exit 1
+fi
+
+TARGET=$1
+OUTPUT_DIR="bin-out"
+TIMESTAMP=$(date +%s)
+
+case "$TARGET" in
+    "linux-arm64"|"linux-x64"|"macos-arm64") ;;
+    *)
+        echo "error: target must be one of: linux-arm64, linux-x64, macos-arm64"
+        exit 1
+        ;;
+esac
+
+mkdir -p "${OUTPUT_DIR}"
+
+# macos builds can be executed natively on dev machines
+if [ "$TARGET" = "macos-arm64" ]; then
+    if [[ "$(uname -m)" != "arm64" ]]; then
+        echo "error: macos-arm64 builds must be run on macOS ARM64"
+        exit 1
+    fi
+    
+    node --experimental-sea-config sea-config.json
+    cp $(nodenv which node) mp
+    codesign --remove-signature mp
+    pnpm postject mp NODE_SEA_BLOB sea-prep.blob \
+        --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2 \
+        --macho-segment-name NODE_SEA
+    codesign --sign - mp
+    
+    mv ./mp "${OUTPUT_DIR}/mp-macos-arm64"
+    
+    exit 0
+fi
+
+# linux builds require using a docker container
+case "$TARGET" in
+    "linux-arm64")
+        PLATFORM="linux/arm64"
+        CONTAINER_ARCH="aarch64"
+        ;;
+    "linux-x64")
+        PLATFORM="linux/amd64"
+        CONTAINER_ARCH="x86_64"
+        ;;
+esac
+
+TEMP_CONTAINER_NAME="compile-${TARGET}-${TIMESTAMP}"
+
+docker run --rm \
+    --platform ${PLATFORM} \
+    --name ${TEMP_CONTAINER_NAME} \
+    -v "$(pwd)/sea-config.json:/app/sea-config.json:ro" \
+    -v "$(pwd)/cli/dist/index.cjs:/app/cli/dist/index.cjs:ro" \
+    -v "$(pwd)/${OUTPUT_DIR}:/app/output" \
+    node:20-bullseye \
+    /bin/bash -c '
+        set -e
+        cd /app
+        
+        # files should be mounted with the following structure:
+        #
+        # /app/
+        #   ├── sea-config.json
+        #   ├── output/
+        #   └── cli/
+        #       └── dist/
+        #           └── index.cjs
+        
+        node --experimental-sea-config sea-config.json
+        cp $(which node) mp
+        npx postject mp NODE_SEA_BLOB sea-prep.blob \
+            --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
+        
+        cp ./mp "/app/output/mp-linux-$(uname -m)"
+    '

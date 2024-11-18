@@ -1,0 +1,19 @@
+@import url("https://rsms.me/inter/inter.css");
+@import url("https://kit.fontawesome.com/0182d4b2e2.css");
+
+@import "super/src/tokens/colors.css";
+@import "./preflight.css";
+
+@layer preflight, libraries, super;
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, Segoe UI,
+    Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji,
+    Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+}
