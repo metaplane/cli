@@ -49,11 +49,11 @@
   "scripts": {
     "build-cli": "tsc -p cli",
     "build-ui": "vite build",
-    "bundle": "esbuild --format=cjs --target=node20 --platform=node --bundle --outfile=cli/dist/index.cjs --define:process.env.DEV=false --loader:.html=text cli/lib/index.js",
     "build-bin-linux": "./bin/build-bin linux-arm64 && ./bin/build-bin linux-x64",
     "build-bin-all": "pnpm build-bin-linux && pnpm build-bin-macos",
     "build-bin-macos": "./bin/build-bin macos-arm64",
+    "bundle": "./bin/bundle",
     "lint": "eslint --quiet ui/src cli/src && prettier -l \"{ui,cli}/src/**/*.{ts,tsx}\"",
-    "prerelease": "./bin/prerelease"
+    "publish-bin": "./bin/publish"
   }
 }

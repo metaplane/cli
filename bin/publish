@@ -10,11 +10,6 @@ if [ -z "$(ls -A bin-out)" ]; then
   exit 1
 fi
 
-if [ "$(find bin-out -type d -mmin +120)" ]; then
-  echo "bin-out directory is older than 2 hours. did you forget to run prerelease?"
-  exit 1
-fi
-
 # copy binaries
 aws s3 cp bin-out/ s3://metaplane-cli/spm/download/ \
   --recursive \
