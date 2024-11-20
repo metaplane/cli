@@ -61,11 +61,7 @@ The exact steps will vary depending on your CI/CD provider, but the following is
 
 - name: install metaplane cli
   run: |
-    LOCAL_BIN=$HOME/.local/bin
-    mkdir -p $LOCAL_BIN
-    curl -LSs https://cli.metaplane.dev/spm/download/linux-x86_64/metaplane -o $HOME/.local/bin/metaplane
-    chmod +x $HOME/.local/bin/metaplane
-    PATH=$HOME/.local/bin:$PATH
+    /bin/bash -c "$(curl -fsSL https://cli.metaplane.dev/spm/install.sh)"
 
 - name: generate dbt results ui
   run: metaplane dbt ui build
