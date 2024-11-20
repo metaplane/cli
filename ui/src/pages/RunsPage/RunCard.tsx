@@ -11,7 +11,7 @@ import { SuperIcon } from "super/src/SuperIcon/SuperIcon";
 import { SuperCodeEditor, SuperStatusPill } from "super";
 import { formatDuration, intervalToDuration, max, min } from "date-fns";
 import { format, isToday, isYesterday } from "date-fns";
-import { useEffect, useMemo, useRef } from "react";
+import { Fragment, useEffect, useMemo, useRef } from "react";
 import pluralize from "pluralize";
 import type { RunResponse } from "../../../../cli/src/dbt/ui/api";
 
@@ -110,7 +110,7 @@ function CompletedRunCard({
               {Object.entries(resourceTypeCounts)
                 .sort(([, a], [, b]) => b - a)
                 .map(([resourceType, count], index, array) => (
-                  <>
+                  <Fragment key={resourceType}>
                     <Text fontSize={12} color="muted" fontWeight="bold">
                       {count}
                     </Text>{" "}
@@ -122,7 +122,7 @@ function CompletedRunCard({
                         {" / "}
                       </Text>
                     )}
-                  </>
+                  </Fragment>
                 ))}
             </Row>
             {run.commitSha && (

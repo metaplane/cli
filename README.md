@@ -4,20 +4,33 @@ This CLI provides miscellaneous tools for working with data stacks.
 
 ## Installation
 
-Download the latest binary appropriate for your platform from the [releases page](https://github.com/metaplane/cli/releases) then optionally add it to your PATH for easy access.
+The easiest way to install the CLI is by using the [provided install script](./bin/install.sh).
 
 ```sh
-LOCAL_BIN=$HOME/.local/bin
-mkdir -p $LOCAL_BIN
-curl -LSs https://github.com/metaplane/cli/releases/download/0.1.0/mp-macos-arm64 -o $LOCAL_BIN/metaplane
-chmod +x $LOCAL_BIN/metaplane
-PATH=$LOCAL_BIN:$PATH # add this to your shell profile
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/metaplane/cli/refs/heads/main/bin/install.sh)"
+```
+
+The script will download the latest binary appropriate for your platform and add it to your PATH for easy access.
+
+If you'd prefer to manually install the CLI, you can download the latest binary for the supported platforms:
+
+- [macos-arm64](https://cli.metaplane.dev/spm/download/macos-arm64/metaplane)
+- [linux-aarch64](https://cli.metaplane.dev/spm/download/linux-aarch64/metaplane)
+- [linux-x86_64](https://cli.metaplane.dev/spm/download/linux-x86_64/metaplane)
+
+After downloading the binary, we recommend adding it to your PATH.
+
+```sh
+mkdir -p $HOME/.local/bin
+curl -LSs https://cli.metaplane.dev/spm/download/macos-arm64/metaplane -o $HOME/.local/bin/metaplane
+chmod +x $HOME/.local/bin/metaplane
+PATH=$HOME/.local/bin:$PATH
 ```
 
 Alternatively, you can run the binary directly from wherever you stored it after downloading it.
 
 ```sh
-./path/to/mp-macos-arm64
+./path/to/metaplane
 ```
 
 ## dbt

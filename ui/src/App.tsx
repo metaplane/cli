@@ -11,6 +11,7 @@ import { RunsPage } from "./pages/RunsPage/RunsPage";
 import { RunPage } from "./pages/RunPage/RunPage";
 import { z } from "zod";
 import { RunTestsPage } from "./pages/RunTestsPage/RunTestsPage";
+import { RunModelsPage } from "./pages/RunModelsPage/RunModelsPage";
 
 // intentional indirection to decouple `RunPage` from `useParams` so
 // that it can be rendered directly in standalone mode
@@ -47,6 +48,7 @@ export function App({
             <Route path="/runs" element={<RunsPage />} />
             <Route path="/runs/:runId" element={<RunPageHandler />} />
             <Route path="/runs/:runId/tests" element={<RunTestsPage />} />
+            <Route path="/runs/:runId/models" element={<RunModelsPage />} />
             <Route path="*" element={<Navigate replace to="/runs" />} />
           </Routes>
         </Column>

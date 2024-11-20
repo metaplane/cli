@@ -34,7 +34,7 @@ export async function buildDev({
     ],
     build: {
       emptyOutDir: true,
-      outDir: path.join(process.cwd(), "metaplane"),
+      outDir: path.join(process.cwd(), ".metaplane"),
     },
   });
 }

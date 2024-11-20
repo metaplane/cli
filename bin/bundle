@@ -1,0 +1,21 @@
+#! /usr/bin/env bash
+
+# change to the script's directory
+cd "$(dirname "$0")/.."
+
+# output ui/dist/index.html
+pnpm build-ui
+
+# output cli/lib/* from ts source
+pnpm build-cli
+
+# combine cli and ui into single cli/dist/index.cjs
+esbuild \
+  --format=cjs \
+  --target=node20 \
+  --platform=node \
+  --bundle \
+  --outfile=cli/dist/index.cjs \
+  --define:process.env.DEV=false \
+  --loader:.html=text \
+  cli/lib/index.js

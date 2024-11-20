@@ -3,6 +3,7 @@ import type { Target } from "../../../../cli/src/utils/target";
 import { Row } from "super/src/components/base/layout";
 import { useMemo } from "react";
 import { ResourceSummaryCard } from "./ResourceSummaryCard";
+import { resolveManifestNode } from "../../utils/manifest";
 
 function displayName(resourceType: string) {
   return resourceType
@@ -25,9 +26,14 @@ export function ResourceSummary({ target }: { target: Target }) {
       result[node.resource_type].nodes.push(node);
       if (node.resource_type === "test") {
         for (const depId of node.depends_on?.nodes || []) {
-          const testedNode = target.manifest.nodes[depId];
+          const testedNode = resolveManifestNode(target.manifest, depId);
           if (testedNode && !testedNodes.has(depId)) {
-            result[testedNode.resource_type].testCount++;
+            (
+              result[testedNode.resource_type] || {
+                nodes: [],
+                testCount: 0,
+              }
+            ).testCount++;
             testedNodes.add(depId);
           }
         }

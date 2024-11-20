@@ -1,0 +1,29 @@
+#!/bin/bash
+
+if [ ! -d "bin-out" ]; then
+  echo "bin-out directory does not exist"
+  exit 1
+fi
+
+if [ -z "$(ls -A bin-out)" ]; then
+  echo "bin-out directory is empty"
+  exit 1
+fi
+
+if [ "$(find bin-out -type d -mmin +120)" ]; then
+  echo "bin-out directory is older than 2 hours. did you forget to run prerelease?"
+  exit 1
+fi
+
+# copy binaries
+aws s3 cp bin-out/ s3://metaplane-cli/spm/download/ \
+  --recursive \
+  --content-type application/octet-stream
+
+# copy install script
+aws s3 cp bin/install.sh s3://metaplane-cli/spm/install.sh
+
+# purge cache
+aws cloudfront create-invalidation \
+  --distribution-id E1G69QS1CB12OP \
+  --paths "/spm/*"

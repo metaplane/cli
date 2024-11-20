@@ -40,8 +40,8 @@ export function RunsPage() {
       }
     >
       <Column flex={1} maxHeight="100vh" overflowY="scroll" gap={majorScale(3)}>
-        {data.map((run, idx) => (
-          <RunCard key={idx} run={run} />
+        {data.map((run) => (
+          <RunCard key={run.id} run={run} />
         ))}
       </Column>
     </PageLayout>

@@ -1,13 +1,21 @@
-import { Link, majorScale, minorScale } from "evergreen-ui";
+import { Link, majorScale, minorScale, Text } from "evergreen-ui";
 import { Column, Row, Span } from "super/src/components/base/layout";
 import { H1, H4 } from "super/src/components/base/type";
 import { SuperDivider } from "super/src/SuperDivider/SuperDivider";
-import { NEUTRAL_200, NEUTRAL_500, RED_600 } from "super/src/tokens/colors";
+import {
+  GREEN_400,
+  NEUTRAL_200,
+  NEUTRAL_500,
+  NEUTRAL_700,
+  RED_600,
+} from "super/src/tokens/colors";
 import { testTypeDisplayName } from "../../utils/tests";
 import { SuperIcon } from "super/src/SuperIcon/SuperIcon";
 import { TypeIconOf } from "@mp/commons-ui/src/TypeIcon";
-import { SuperCodeEditor, SuperStatusPill } from "super";
+import { SuperCodeEditor, SuperFillBox, SuperStatusPill } from "super";
 import type { Target } from "../../../../cli/src/utils/target";
+import { PageCard } from "@mp/ui/src/components/base/Page";
+import { resolveManifestNode } from "../../utils/manifest";
 
 type TestNode =
   | {
@@ -79,9 +87,42 @@ export function FailingTests({ target }: { target: Target }) {
   const { runResults, manifest } = target;
 
   const failingTests = runResults.results.filter((result) => {
-    const node = manifest.nodes[result.unique_id];
+    const node = resolveManifestNode(manifest, result.unique_id);
     return node?.resource_type === "test" && result.status === "fail";
   });
+
+  if (!failingTests.length) {
+    return (
+      <Column maxHeight="100vh" overflowY="scroll" gap={majorScale(3)} flex={1}>
+        <SuperFillBox>
+          <PageCard
+            display="flex"
+            flexDirection="column"
+            width={400}
+            paddingY={majorScale(5)}
+            paddingX={majorScale(5)}
+            boxShadow={`0px 4px 8px 0px ${NEUTRAL_700}22`}
+            gap={majorScale(2)}
+          >
+            <Column
+              justifyContent="center"
+              alignItems="center"
+              gap={majorScale(4)}
+            >
+              <H1>All tests passed!</H1>
+              <SuperIcon
+                name="check-circle"
+                color={GREEN_400}
+                type="solid"
+                fontSize={60}
+              />
+              <Text>All tests in this run completed successfully.</Text>
+            </Column>
+          </PageCard>
+        </SuperFillBox>
+      </Column>
+    );
+  }
 
   return (
     <Column maxHeight="100vh" overflowY="scroll" gap={majorScale(3)}>

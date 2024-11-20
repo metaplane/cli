@@ -33,14 +33,15 @@ if [ "$TARGET" = "macos-arm64" ]; then
     fi
     
     node --experimental-sea-config sea-config.json
-    cp $(nodenv which node) mp
-    codesign --remove-signature mp
-    pnpm postject mp NODE_SEA_BLOB sea-prep.blob \
+    cp $(nodenv which node) metaplane
+    codesign --remove-signature metaplane
+    pnpm postject metaplane NODE_SEA_BLOB sea-prep.blob \
         --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2 \
         --macho-segment-name NODE_SEA
-    codesign --sign - mp
+    codesign --sign - metaplane
     
-    mv ./mp "${OUTPUT_DIR}/mp-macos-arm64"
+    mkdir -p "${OUTPUT_DIR}/macos-arm64"
+    mv ./metaplane "${OUTPUT_DIR}/macos-arm64/metaplane"
     
     exit 0
 fi
@@ -80,9 +81,11 @@ docker run --rm \
         #           └── index.cjs
         
         node --experimental-sea-config sea-config.json
-        cp $(which node) mp
-        npx postject mp NODE_SEA_BLOB sea-prep.blob \
+        cp $(which node) metaplane
+        npx postject metaplane NODE_SEA_BLOB sea-prep.blob \
             --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
         
-        cp ./mp "/app/output/mp-linux-$(uname -m)"
+        OUTPUT_PATH="/app/output/linux-$(uname -m)"
+        mkdir -p "${OUTPUT_PATH}"
+        cp ./metaplane "${OUTPUT_PATH}/metaplane"
     '

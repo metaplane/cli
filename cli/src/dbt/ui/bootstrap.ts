@@ -5,8 +5,9 @@ export type BootstrapData = {
 };
 
 export function bootstrap(html: string, data: BootstrapData) {
+  const encoded = Buffer.from(JSON.stringify(data)).toString("base64");
   return html.replace(
     "<!-- BOOTSTRAP_DATA -->",
-    `<script>var BOOTSTRAP_DATA = ${JSON.stringify(data)}</script>`
+    `<script>var BOOTSTRAP_DATA = JSON.parse(atob("${encoded}"))</script>`
   );
 }

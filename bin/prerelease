@@ -1,9 +1,0 @@
-#! /usr/bin/env bash
-
-# change to the script's directory
-cd "$(dirname "$0")/.."
-
-# output the `index.html`
-pnpm build-ui
-pnpm build-cli
-pnpm bundle
