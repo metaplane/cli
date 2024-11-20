@@ -63,7 +63,7 @@ The exact steps will vary depending on your CI/CD provider, but the following is
   run: |
     LOCAL_BIN=$HOME/.local/bin
     mkdir -p $LOCAL_BIN
-    curl -LSs https://github.com/metaplane/cli/releases/download/0.1.0/mp-linux-x86_64 -o $HOME/.local/bin/metaplane
+    curl -LSs https://cli.metaplane.dev/spm/download/linux-x86_64/metaplane -o $HOME/.local/bin/metaplane
     chmod +x $HOME/.local/bin/metaplane
     PATH=$HOME/.local/bin:$PATH
 
