@@ -21,10 +21,10 @@ then
   fi
 elif [[ "${UNAME_MACHINE}" == "x86_64" ]]
 then
-  DOWNLOAD_URL="https://cli.metaplane.dev/spm/download/linux-x64/metaplane"
+  DOWNLOAD_URL="https://cli.metaplane.dev/spm/download/linux-x86_64/metaplane"
 elif [[ "${UNAME_MACHINE}" == "aarch64" ]] || [[ "${UNAME_MACHINE}" == "arm64" ]]
 then
-  DOWNLOAD_URL="https://cli.metaplane.dev/spm/download/linux-arm64/metaplane"
+  DOWNLOAD_URL="https://cli.metaplane.dev/spm/download/linux-aarch64/metaplane"
 else
   echo "Unsupported architecture: ${UNAME_MACHINE}"
   exit 1
