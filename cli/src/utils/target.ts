@@ -6,7 +6,10 @@ import fs from "fs";
 import path from "path";
 import { z } from "zod";
 
-const RunResultsSchema = z.object({
+export const RunResultsSchema = z.object({
+  metadata: z.object({
+    invocation_id: z.string(),
+  }),
   results: z.array(
     z.object({
       status: z.enum(["success", "error", "pass", "fail", "skipped"]),
@@ -14,6 +17,7 @@ const RunResultsSchema = z.object({
       message: z.string().nullish(),
       compiled_code: z.string().nullish(),
       adapter_response: z.record(z.any()),
+      thread_id: z.string(),
       timing: z.array(
         z.object({
           name: z.string(),
@@ -23,9 +27,6 @@ const RunResultsSchema = z.object({
       ),
     })
   ),
-  args: z.object({
-    project_dir: z.string(),
-  }),
 });
 
 const NodeSchema = z.object({
@@ -38,6 +39,8 @@ const NodeSchema = z.object({
   // it's usually the same as `name` but you can alter it to rename what goes into the db
   alias: z.string().nullish(),
   materialized: z.string().nullish(),
+
+  raw_code: z.string().nullish(),
 
   // this is sorta like alias, but for source nodes only
   // https://docs.getdbt.com/reference/resource-properties/identifier
@@ -69,6 +72,17 @@ const NodeSchema = z.object({
     "metric",
     "analysis",
   ]),
+
+  columns: z
+    .record(
+      z.string(),
+      z.object({
+        name: z.string(),
+        description: z.string(),
+        data_type: z.string().nullish(),
+      })
+    )
+    .nullish(),
   description: z.string().nullish(),
   tags: z.array(z.string()).nullish(),
   depends_on: z
@@ -78,7 +92,7 @@ const NodeSchema = z.object({
     .nullish(),
 });
 
-const ManifestSchema = z.object({
+export const ManifestSchema = z.object({
   metadata: z.object({
     project_name: z.string(),
     invocation_id: z.string(),

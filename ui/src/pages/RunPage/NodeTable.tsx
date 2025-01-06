@@ -1,19 +1,35 @@
 import { SuperIcon, SuperIconButton, SuperTable, SuperTooltip } from "super";
-import type { Target } from "../../../../cli/src/utils/target";
 import { useCallback, useMemo, useState } from "react";
-import { min, max, intervalToDuration, formatDuration } from "date-fns";
-import { useRunTest } from "../../data/runs";
+import {
+  min,
+  max,
+  intervalToDuration,
+  formatDuration,
+  type Duration,
+} from "date-fns";
+import { useRunContext, useRunTest } from "../../data/runs";
 import { useNavigate } from "react-router-dom";
 import { isStandalone } from "../../utils/standalone";
-import { resolveManifestNode } from "../../utils/manifest";
-import { NEUTRAL_400, RED_400, GREEN_400 } from "super/src/tokens/colors";
-import { Code, majorScale, TextInput } from "evergreen-ui";
+import {
+  resourceTypeDisplayName,
+  type UnifiedRunManifest,
+  type UnifiedRunManifestNode,
+} from "../../utils/target";
+import { NEUTRAL_400, RED_600, GREEN_600 } from "super/src/tokens/colors";
+import { majorScale, Text, TextInput } from "evergreen-ui";
 import { Column } from "super/src/components/base/layout";
 import { useFuzzyFilter } from "@mp/ui/src/utils/FuzzyFilter";
+import { Link } from "@mp/ui/src/components/base/Link/Link";
+import { makeNodeDetailsUrl } from "../../utils/navigate";
 
-type RunResultNode = Target["runResults"]["results"][number];
-
-export function NodeTable({ target }: { target: Target }) {
+export function NodeTable({
+  unifiedRunManifest,
+  nodeType,
+}: {
+  unifiedRunManifest: UnifiedRunManifest;
+  nodeType?: string;
+}) {
+  const runContext = useRunContext();
   const [sortField, setSortField] = useState<
     "status" | "type" | "name" | "startedAt" | "completedAt" | "duration"
   >("status");
@@ -22,23 +38,49 @@ export function NodeTable({ target }: { target: Target }) {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
 
-  const getRowKey = useCallback((node: RunResultNode) => node.unique_id, []);
+  const getRowKey = useCallback(
+    (node: UnifiedRunManifestNode) => node.uniqueId,
+    []
+  );
 
   const sortedRows = useMemo(() => {
-    const rows = Object.values(target.runResults.results);
+    const rows = nodeType
+      ? unifiedRunManifest.nodesByResourceType[nodeType]
+      : unifiedRunManifest.nodes;
 
-    return rows.sort((a, b) => {
-      const manifestNodeA = resolveManifestNode(target.manifest, a.unique_id);
-      const manifestNodeB = resolveManifestNode(target.manifest, b.unique_id);
-      const startedAtA = min(a.timing.map((t) => t.started_at));
-      const startedAtB = min(b.timing.map((t) => t.started_at));
-      const completedAtA = max(a.timing.map((t) => t.completed_at));
-      const completedAtB = max(b.timing.map((t) => t.completed_at));
+    return [...rows].sort((a, b) => {
+      const manifestNodeA = a.manifest;
+      const manifestNodeB = b.manifest;
+      const startedAtA =
+        a.runResult && a.runResult.status !== "skipped"
+          ? min(a.runResult.timing.map((t) => t.started_at))
+          : null;
+      const startedAtB =
+        b.runResult && b.runResult.status !== "skipped"
+          ? min(b.runResult.timing.map((t) => t.started_at))
+          : null;
+      const completedAtA =
+        a.runResult && a.runResult.status !== "skipped"
+          ? max(a.runResult.timing.map((t) => t.completed_at))
+          : null;
+      const completedAtB =
+        b.runResult && b.runResult.status !== "skipped"
+          ? max(b.runResult.timing.map((t) => t.completed_at))
+          : null;
+      const statusA = a.runResult?.status ?? "skipped";
+      const statusB = b.runResult?.status ?? "skipped";
 
       let comparison: number;
       switch (sortField) {
         case "status":
-          comparison = a.status.localeCompare(b.status);
+          // Put skipped nodes at the end by handling them specially
+          if (statusA === "skipped" && statusB !== "skipped") {
+            comparison = 1;
+          } else if (statusA !== "skipped" && statusB === "skipped") {
+            comparison = -1;
+          } else {
+            comparison = statusA.localeCompare(statusB);
+          }
           break;
         case "type":
           comparison = manifestNodeA.resource_type.localeCompare(
@@ -51,14 +93,18 @@ export function NodeTable({ target }: { target: Target }) {
           );
           break;
         case "startedAt":
-          comparison = startedAtA.getTime() - startedAtB.getTime();
+          comparison =
+            startedAtA?.getTime() ?? 0 - (startedAtB?.getTime() ?? 0);
           break;
         case "completedAt":
-          comparison = completedAtA.getTime() - completedAtB.getTime();
+          comparison =
+            (completedAtA?.getTime() ?? 0) - (completedAtB?.getTime() ?? 0);
           break;
         case "duration": {
-          const durationA = completedAtA.getTime() - startedAtA.getTime();
-          const durationB = completedAtB.getTime() - startedAtB.getTime();
+          const durationA =
+            (completedAtA?.getTime() ?? 0) - (startedAtA?.getTime() ?? 0);
+          const durationB =
+            (completedAtB?.getTime() ?? 0) - (startedAtB?.getTime() ?? 0);
           comparison = durationA - durationB;
           break;
         }
@@ -68,52 +114,62 @@ export function NodeTable({ target }: { target: Target }) {
 
       return sortDir === "asc" ? comparison : -comparison;
     });
-  }, [target, sortField, sortDir]);
+  }, [unifiedRunManifest, sortField, sortDir, nodeType]);
 
   const visibleNodes = useFuzzyFilter(
     {
       items: sortedRows,
-      keyFn: (node) => node.unique_id,
+      keyFn: (node) => node.uniqueId,
     },
     search
   );
 
   const renderRow = useCallback(
-    (runResultNode: RunResultNode) => {
-      const manifestNode = resolveManifestNode(
-        target.manifest,
-        runResultNode.unique_id
-      );
-      const status = runResultNode.status;
-      const startedAt = min(runResultNode.timing.map((t) => t.started_at));
-      const completedAt = max(runResultNode.timing.map((t) => t.completed_at));
-      const duration = intervalToDuration({
-        start: startedAt,
-        end: completedAt,
-      });
-      const formattedDuration = formatDuration(duration, { zero: true });
+    (node: UnifiedRunManifestNode) => {
+      const manifestNode = node.manifest;
+      const status = node.runResult?.status ?? "skipped";
+      const startedAt =
+        node.runResult?.timing && node.runResult.status !== "skipped"
+          ? min(node.runResult.timing.map((t) => t.started_at))
+          : null;
+      const completedAt =
+        node.runResult?.timing && node.runResult.status !== "skipped"
+          ? max(node.runResult.timing.map((t) => t.completed_at))
+          : null;
+      let duration: Duration | undefined;
+      let formattedDuration = "-";
+      if (startedAt && completedAt) {
+        duration = intervalToDuration({
+          start: startedAt,
+          end: completedAt,
+        });
+        formattedDuration = formatDuration(duration, { zero: true });
+      }
       return (
-        <SuperTable.Row>
+        <SuperTable.NavRow
+          is={Link}
+          to={makeNodeDetailsUrl(runContext, node.uniqueId)}
+        >
           <SuperTable.Cell flex={0.5}>
             <SuperTooltip content={status}>
               {status === "success" || status === "pass" ? (
                 <SuperIcon
                   name="check-circle"
-                  color={GREEN_400}
+                  color={GREEN_600}
                   type="solid"
                   fontSize={18}
                 />
               ) : status === "fail" ? (
                 <SuperIcon
                   name="circle-xmark"
-                  color={RED_400}
+                  color={RED_600}
                   type="solid"
                   fontSize={18}
                 />
               ) : status === "error" ? (
                 <SuperIcon
                   name="circle-exclamation"
-                  color={RED_400}
+                  color={RED_600}
                   type="solid"
                   fontSize={18}
                 />
@@ -129,26 +185,24 @@ export function NodeTable({ target }: { target: Target }) {
               )}
             </SuperTooltip>
           </SuperTable.Cell>
-          <SuperTable.Cell flex={1}>
-            {manifestNode.resource_type}
-          </SuperTable.Cell>
+          {nodeType === undefined && (
+            <SuperTable.Cell flex={1}>
+              <Text>{resourceTypeDisplayName(manifestNode.resource_type)}</Text>
+            </SuperTable.Cell>
+          )}
           <SuperTable.Cell flex={4}>
-            <Code overflowX="hidden" textOverflow="ellipsis">
-              {manifestNode.name}
-            </Code>
+            <pre>{manifestNode.name}</pre>
           </SuperTable.Cell>
           <SuperTable.Cell flex={1.5}>
-            {status !== "skipped" ? startedAt.toLocaleString() : "-"}
+            <Text>{startedAt?.toLocaleString() ?? "-"}</Text>
           </SuperTable.Cell>
           <SuperTable.Cell flex={1.5}>
-            {status !== "skipped" ? completedAt.toLocaleString() : "-"}
+            <Text>{completedAt?.toLocaleString() ?? "-"}</Text>
           </SuperTable.Cell>
           <SuperTable.Cell flex={1}>
-            {status !== "skipped"
-              ? formattedDuration === ""
-                ? "< 1 second"
-                : formattedDuration
-              : "-"}
+            <Text>
+              {formattedDuration === "" ? "< 1 second" : formattedDuration}
+            </Text>
           </SuperTable.Cell>
           {!isStandalone() && (
             <SuperTable.Cell flex={0.5}>
@@ -162,10 +216,10 @@ export function NodeTable({ target }: { target: Target }) {
               />
             </SuperTable.Cell>
           )}
-        </SuperTable.Row>
+        </SuperTable.NavRow>
       );
     },
-    [target, navigate, runTest]
+    [navigate, runTest, runContext, nodeType]
   );
   return (
     <Column gap={majorScale(1)} flex={1}>
@@ -188,16 +242,18 @@ export function NodeTable({ target }: { target: Target }) {
           >
             Status
           </SuperTable.SortableHeaderCell>
-          <SuperTable.SortableHeaderCell
-            flex={1}
-            sortDirection={sortField === "type" ? sortDir : undefined}
-            onSortDirectionChange={(dir) => {
-              setSortField("type");
-              setSortDir(dir);
-            }}
-          >
-            Type
-          </SuperTable.SortableHeaderCell>
+          {nodeType === undefined && (
+            <SuperTable.SortableHeaderCell
+              flex={1}
+              sortDirection={sortField === "type" ? sortDir : undefined}
+              onSortDirectionChange={(dir) => {
+                setSortField("type");
+                setSortDir(dir);
+              }}
+            >
+              Type
+            </SuperTable.SortableHeaderCell>
+          )}
           <SuperTable.SortableHeaderCell
             flex={4}
             sortDirection={sortField === "name" ? sortDir : undefined}

@@ -1,5 +1,16 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { RunResponse } from "../../../cli/src/dbt/ui/api";
+import { createContext, useContext } from "react";
+import type { UnifiedRunManifest } from "../utils/target";
+
+export type RunContext = {
+  response: RunResponse & {
+    status: "completed";
+  };
+  unifiedRunManifest: UnifiedRunManifest;
+};
+
+export const RunContext = createContext<RunContext | null>(null);
 
 function fetchRuns() {
   if (window.BOOTSTRAP_DATA) {
@@ -20,21 +31,22 @@ function createRunTest(name: string) {
   }).then((res) => res.json());
 }
 
+export const RUNS_QUERY_KEY = ["runs"];
+
 export function useRuns() {
   return useQuery<RunResponse[]>({
-    queryKey: ["runs"],
+    queryKey: RUNS_QUERY_KEY,
     queryFn: fetchRuns,
-    refetchInterval: 1000,
+    staleTime: Infinity,
   });
 }
 
-export function useRun(runId: string) {
-  return useQuery<RunResponse[], Error, RunResponse | undefined>({
-    queryKey: ["runs", runId],
-    queryFn: fetchRuns,
-    select: (data) => data.find((run) => run.id === runId),
-    staleTime: Infinity, // never goes stale
-  });
+export function useRunContext() {
+  const run = useContext(RunContext);
+  if (!run) {
+    throw new Error("No current run");
+  }
+  return run;
 }
 
 export function useMakeRun() {

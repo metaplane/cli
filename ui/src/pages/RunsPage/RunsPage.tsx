@@ -1,11 +1,12 @@
 import { PageError, PageLayout } from "@mp/ui/src/components/base";
 import { SuperButton, SuperFillSpinner } from "super";
-import { Column } from "super/src/components/base/layout";
+import { Column, Row } from "super/src/components/base/layout";
 import { RunCard } from "./RunCard";
 import { useMakeRun, useRuns } from "../../data/runs";
 import { useCallback } from "react";
 import { majorScale } from "evergreen-ui";
 import { isStandalone } from "../../utils/standalone";
+import { DropZoneCTA } from "../../components/DropZoneCTA/DropZoneCTA";
 
 export function RunsPage() {
   const { isPending, error, data } = useRuns();
@@ -43,6 +44,13 @@ export function RunsPage() {
         {data.map((run) => (
           <RunCard key={run.id} run={run} />
         ))}
+        <Row justifyContent="center">
+          <DropZoneCTA
+            justifyContent="center"
+            paddingX={majorScale(4)}
+            paddingY={majorScale(8)}
+          />
+        </Row>
       </Column>
     </PageLayout>
   );

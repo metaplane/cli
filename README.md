@@ -35,7 +35,7 @@ Alternatively, you can run the binary directly from wherever you stored it after
 
 ## dbt
 
-Generate a UI from the latest dbt run
+Generate a UI from the latest dbt run. See example UI [here](https://dbt-explorer.metaplane.dev).
 
 ```sh
 metaplane dbt ui build

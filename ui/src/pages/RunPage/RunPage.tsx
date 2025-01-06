@@ -3,25 +3,29 @@ import {
   PageError404,
   PageLayout,
 } from "@mp/ui/src/components/base";
-import { Column } from "super/src/components/base/layout";
+import { Row } from "super/src/components/base/layout";
 import { SuperFillSpinner } from "super/src/SuperFill/SuperFillSpinner";
-import { useRun } from "../../data/runs";
-import { ResourceSummary } from "./ResourceSummary";
-import { NodeTable } from "./NodeTable";
+import { RunContext, useRuns } from "../../data/runs";
 import { majorScale } from "evergreen-ui";
 import { RunPageTabs } from "../../components/RunPageTabs/RunPageTabs";
-import { SuperCodeEditor } from "super/src/SuperCodeEditor/SuperCodeEditor";
-import { useEffect, useRef } from "react";
+import { Outlet } from "react-router-dom";
+import { useRunIdParam } from "./params";
+import { useMemo } from "react";
+import { makeUnifiedRunManifest } from "../../utils/target";
 
-export function RunPage({ runId }: { runId: string }) {
-  const { isPending, error, data } = useRun(runId);
-  const logRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (logRef.current) {
-      logRef.current.scrollTop = logRef.current.scrollHeight;
+export function RunPage() {
+  const runId = useRunIdParam();
+  const { isPending, error, data } = useRuns();
+  const runContext = useMemo(() => {
+    const run = data?.find((run) => run.id === runId);
+    if (run && run.status === "completed") {
+      const unifiedRunManifest = makeUnifiedRunManifest(run.target);
+      return {
+        response: run,
+        unifiedRunManifest,
+      };
     }
-  }, [data?.stdout]);
+  }, [data, runId]);
 
   if (isPending) {
     return <SuperFillSpinner />;
@@ -40,29 +44,20 @@ export function RunPage({ runId }: { runId: string }) {
       title="Run"
       subtitle={runId}
       backgroundColor="white"
-      tabs={data.status === "completed" ? <RunPageTabs run={data} /> : null}
+      tabs={
+        runContext?.response.status === "completed" ? (
+          <RunPageTabs run={runContext.response} />
+        ) : null
+      }
     >
-      {data.status === "pending" ? (
+      {runContext === undefined ? (
         <SuperFillSpinner />
       ) : (
-        <Column
-          flex={1}
-          maxHeight="100vh"
-          overflowY="scroll"
-          gap={majorScale(3)}
-        >
-          <ResourceSummary target={data.target} />
-          {data.stdout && (
-            <SuperCodeEditor
-              ref={logRef}
-              readOnly
-              language="shell-session"
-              value={data.stdout}
-              maxHeight={200}
-            />
-          )}
-          <NodeTable target={data.target} />
-        </Column>
+        <Row width="100%" gap={majorScale(3)}>
+          <RunContext.Provider value={runContext}>
+            <Outlet />
+          </RunContext.Provider>
+        </Row>
       )}
     </PageLayout>
   );

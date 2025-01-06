@@ -1,0 +1,20 @@
+.FileDropZone-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.FileDropZone-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: background-color 200ms ease;
+  background-color: rgba(128, 128, 128, 0.6);
+}
+
+.FileDropZone-dropZone {
+  position: absolute;
+  inset: 0;
+  pointer-events: all;
+  background-color: transparent;
+}
