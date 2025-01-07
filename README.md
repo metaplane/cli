@@ -4,7 +4,14 @@ This CLI provides miscellaneous tools for working with data stacks.
 
 ## Installation
 
-The easiest way to install the CLI is by using the [provided install script](./bin/install.sh).
+If you're using macOS and homebrew, you can install the CLI with the following command:
+
+```sh
+brew tap metaplane/metaplane
+brew install metaplane
+```
+
+Otherwise, the easiest way to install the CLI is by using the [provided install script](./bin/install.sh).
 
 ```sh
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/metaplane/cli/refs/heads/main/bin/install.sh)"
